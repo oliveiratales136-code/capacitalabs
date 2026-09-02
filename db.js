@@ -77,21 +77,21 @@ module.exports = {
     return [...state.students].sort((a, b) => b.id - a.id);
   },
 
-  findStudentByMatricula(matricula) {
-    return state.students.find(s => s.matricula === matricula) || null;
+  findStudentByEmail(email) {
+    return state.students.find(s => s.email.toLowerCase() === email.toLowerCase()) || null;
   },
 
-  createStudentAndUser({ nome, matricula, curso, email, senha, createdBy }) {
-    const username = matricula.trim().toLowerCase();
-    if (this.findStudentByMatricula(matricula) || this.findUserByUsername(username)) {
-      const err = new Error('Já existe um aluno com essa matrícula.');
+  createStudentAndUser({ nome, email, senha, createdBy }) {
+    const username = email.trim().toLowerCase();
+    if (this.findStudentByEmail(email) || this.findUserByUsername(username)) {
+      const err = new Error('Já existe um aluno cadastrado com esse e-mail.');
       err.code = 'DUPLICATE';
       throw err;
     }
 
     const student = {
       id: state.nextStudentId++,
-      nome, matricula, curso, email,
+      nome, email,
       created_by: createdBy,
       created_at: new Date().toISOString(),
     };
@@ -103,7 +103,7 @@ module.exports = {
       password_hash: hashPassword(senha),
       role: 'aluno',
       name: nome,
-      label: curso,
+      label: 'Aluno',
       created_at: new Date().toISOString(),
     });
 

@@ -115,7 +115,7 @@ const server = http.createServer(async (req, res) => {
       if (!['professor', 'admin'].includes(user.role)) {
         return sendJSON(res, 403, { error: 'Você não tem permissão para esta ação.' });
       }
-      const rows = db.listStudents().map(({ id, nome, matricula, curso, email, created_at }) => ({ id, nome, matricula, curso, email, created_at }));
+      const rows = db.listStudents().map(({ id, nome, email, created_at }) => ({ id, nome, email, created_at }));
       return sendJSON(res, 200, { students: rows });
     }
 
@@ -126,13 +126,13 @@ const server = http.createServer(async (req, res) => {
       if (!['professor', 'admin'].includes(user.role)) {
         return sendJSON(res, 403, { error: 'Você não tem permissão para esta ação.' });
       }
-      const { nome, matricula, curso, email, senha } = await readBody(req);
-      if (!nome || !matricula || !curso || !email || !senha) {
+      const { nome, email, senha } = await readBody(req);
+      if (!nome || !email || !senha) {
         return sendJSON(res, 400, { error: 'Preencha todos os campos.' });
       }
       try {
         const { username } = db.createStudentAndUser({
-          nome, matricula: String(matricula).trim(), curso, email, senha,
+          nome, email: String(email).trim(), senha,
           createdBy: user.username,
         });
         return sendJSON(res, 201, { ok: true, login: { username, senha } });
