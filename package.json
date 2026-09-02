@@ -1,0 +1,10 @@
+{
+  "name": "capacitalab-backend",
+  "version": "1.0.0",
+  "description": "Backend do CapacitaLab: login e cadastro de alunos persistentes. Zero dependências externas.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
