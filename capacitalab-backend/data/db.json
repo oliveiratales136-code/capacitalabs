@@ -1,0 +1,42 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "tacio.macedo",
+      "password_hash": "94346a8208d8fa70b15ed993097ddfa8:4c61916ecc963e46125d327706ac3e395374bfce3a398d6658659036fafa3d8cce256f009ab2268b1cd2ae9f2bfb18971c6853181e7ebbeeb0941f863f297e94",
+      "role": "professor",
+      "name": "Tácio Macedo",
+      "label": "Professor responsável",
+      "created_at": "2026-09-02T19:12:05.038Z"
+    },
+    {
+      "id": 2,
+      "username": "tales.oliveira",
+      "password_hash": "5e83d9c576f27915dc22fed378bddb89:a2ae561968c28401e968dd6c158c9246bfc061e1cdedfbb6e1b23ce6643c6271c4ee52dae2f61cce9ad88bb48c6d3dc02aedaa03de00261c7b1e497c2710c746",
+      "role": "admin",
+      "name": "Tales Oliveira",
+      "label": "Administrador",
+      "created_at": "2026-09-02T19:12:05.074Z"
+    },
+    {
+      "id": 3,
+      "username": "eduardo.rodrigues",
+      "password_hash": "0017fc61d4087738d00a8343b5bd98ac:57f316c51dc83f39ff21546f7a0bf8aefc88bcf4ab70e38ed04efb23926f1ff29a3206683d2f64091fc1fb2f9c237cc84bef8036239e05edd86b3a9ea98a74a6",
+      "role": "aluno",
+      "name": "Eduardo Rodrigues",
+      "label": "Técnico em Enfermagem",
+      "created_at": "2026-09-02T19:12:05.111Z"
+    }
+  ],
+  "students": [],
+  "activities": [],
+  "grades": [],
+  "videos": [],
+  "forumPosts": [],
+  "nextUserId": 4,
+  "nextStudentId": 1,
+  "nextActivityId": 1,
+  "nextGradeId": 1,
+  "nextVideoId": 1,
+  "nextForumId": 1
+}
