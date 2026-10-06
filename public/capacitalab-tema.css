@@ -1,0 +1,426 @@
+/* =====================================================================
+   CapacitaLab · Tema "Área de Membros" (inspirado em plataformas de curso)
+   Cole este bloco DEPOIS do <style> original (antes de </head>).
+   Ele não apaga nada do CSS antigo: só sobrescreve o visual.
+   ===================================================================== */
+
+/* ---------- 1. Paleta (escura, cinematográfica, mantendo o verde da marca) */
+:root{
+  --ink:#EAF5F0;            /* texto principal */
+  --paper:#0A1311;          /* fundo da página */
+  --card:#111C19;           /* superfícies */
+  --line:rgba(255,255,255,.08);
+  --brand:#1FBF8A;          /* verde de destaque */
+  --brand-dark:#7DEBC2;     /* usado como cor de texto do logo / pills */
+  --mint:rgba(43,212,154,.14);
+  --mint-deep:#2BD49A;
+  --amber:#FFB547;
+  --amber-bg:rgba(255,181,71,.13);
+  --red:#FF7272;
+  --red-bg:rgba(255,114,114,.13);
+  --muted:#8FA59D;
+
+  /* tokens novos */
+  --surface-2:#16241F;
+  --glow:0 0 0 1px rgba(43,212,154,.35), 0 18px 40px -12px rgba(31,191,138,.45);
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 20px 50px -24px rgba(0,0,0,.8);
+  --hot:#FF6A3D;            /* laranja de chamada (CTA) */
+  --grad:linear-gradient(135deg,#1FBF8A 0%,#14A3A0 55%,#0E7C86 100%);
+  --grad-hot:linear-gradient(135deg,#FF8A3D 0%,#FF5A5F 100%);
+  --radius:18px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+
+/* O certificado continua com as cores claras originais na impressão */
+#certificate-print{
+  --ink:#10241F; --paper:#F6FAF8; --card:#FFFFFF; --line:#E1E8E4;
+  --brand:#1F7A5C; --brand-dark:#154F3C; --mint:#CFF3E2; --mint-deep:#8FE3C0;
+  --muted:#5B6E67;
+  color:var(--ink);
+}
+
+/* ---------- 2. Base */
+html{ scroll-behavior:smooth; }
+body{
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(31,191,138,.16), transparent 60%),
+    radial-gradient(700px 500px at -10% 30%, rgba(14,124,134,.14), transparent 60%),
+    var(--paper);
+  background-attachment:fixed;
+  color:var(--ink);
+}
+::selection{ background:rgba(43,212,154,.35); color:#fff; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:#22332D; border-radius:10px; border:2px solid var(--paper); }
+::-webkit-scrollbar-thumb:hover{ background:#2E4A40; }
+
+/* Títulos com mais presença */
+body h3.display{ font-size:1.75rem; letter-spacing:-.02em; }
+body h3.display::after{
+  content:""; display:block; width:42px; height:4px; margin-top:8px;
+  border-radius:4px; background:var(--grad);
+}
+
+/* ---------- 3. Cabeçalho "vidro" */
+body header.bg-white{
+  background:rgba(10,19,17,.68);
+  backdrop-filter:saturate(160%) blur(16px);
+  -webkit-backdrop-filter:saturate(160%) blur(16px);
+  border-color:var(--line);
+  transition:box-shadow .3s ease, background .3s ease;
+}
+body header.bg-white.is-scrolled{
+  background:rgba(10,19,17,.88);
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.7);
+}
+/* selo do logo */
+body .bg-\[var\(--brand\)\].p-2.rounded-lg{
+  background:var(--grad);
+  box-shadow:0 6px 20px -6px rgba(31,191,138,.7);
+  transition:transform .4s var(--ease);
+}
+body header:hover .bg-\[var\(--brand\)\].p-2.rounded-lg{ transform:rotate(-8deg) scale(1.06); }
+body header span.display{ color:#fff; letter-spacing:-.02em; }
+body header img.rounded-full{
+  border-color:transparent;
+  box-shadow:0 0 0 2px var(--paper), 0 0 0 4px var(--mint-deep);
+}
+
+/* ---------- 4. Cards */
+body .card{
+  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0)) , var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+/* Card de perfil do aluno (lateral) */
+body aside > .card:first-child{
+  position:relative; overflow:hidden;
+}
+body aside > .card:first-child::before{
+  content:""; position:absolute; inset:0 0 auto 0; height:84px;
+  background:
+    radial-gradient(120px 80px at 85% 0%, rgba(255,106,61,.25), transparent 70%),
+    linear-gradient(135deg, rgba(31,191,138,.35), rgba(14,124,134,.15));
+  pointer-events:none;
+}
+body aside > .card:first-child > *{ position:relative; }
+body aside > .card:first-child img.rounded-xl{
+  border-radius:16px;
+  box-shadow:0 0 0 3px var(--card), 0 10px 24px -8px rgba(0,0,0,.6);
+}
+
+/* ---------- 5. Barra de progresso com brilho */
+body .progress-track{ background:rgba(255,255,255,.07); height:10px; }
+body .progress-fill{
+  position:relative;
+  background:var(--grad);
+  box-shadow:0 0 14px rgba(43,212,154,.55);
+}
+body .progress-fill::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+  transform:translateX(-100%);
+  animation:clShimmer 2.4s ease-in-out infinite;
+}
+@keyframes clShimmer{ to{ transform:translateX(100%); } }
+#progress-pct{ color:var(--mint-deep); }
+
+/* ---------- 6. Menu lateral (abas) */
+body .navtab{
+  color:var(--ink);
+  border-radius:12px;
+  transition:background .25s ease, transform .25s var(--ease), color .2s ease;
+  overflow:hidden;
+}
+body .navtab i{ font-size:1.15rem; transition:transform .3s var(--ease); }
+body .navtab:hover{ background:rgba(255,255,255,.05); transform:translateX(4px); }
+body .navtab:hover i{ transform:scale(1.15); }
+body .navtab.active{
+  background:var(--grad);
+  color:#fff;
+  box-shadow:0 10px 24px -10px rgba(31,191,138,.8);
+}
+body .navtab.active:hover{ transform:none; }
+body .navtab.active::before{ background:#fff; opacity:.85; }
+
+/* ---------- 7. Botões */
+body .btn{ position:relative; overflow:hidden; border-radius:12px; }
+body .btn-primary{
+  background:var(--grad);
+  color:#fff;
+  box-shadow:0 10px 24px -10px rgba(31,191,138,.75);
+}
+body .btn-primary:hover{
+  background:var(--grad);
+  filter:brightness(1.08);
+  transform:translateY(-2px);
+  box-shadow:0 16px 30px -10px rgba(31,191,138,.85);
+}
+body .btn-ghost{ border-color:var(--line); color:var(--ink); background:rgba(255,255,255,.03); }
+body .btn-ghost:hover{ border-color:var(--mint-deep); color:var(--mint-deep); background:rgba(43,212,154,.06); }
+
+/* efeito "ripple" criado pelo JS */
+.cl-ripple{
+  position:absolute; border-radius:50%; pointer-events:none;
+  background:rgba(255,255,255,.35);
+  transform:scale(0); animation:clRipple .6s ease-out forwards;
+}
+@keyframes clRipple{ to{ transform:scale(4); opacity:0; } }
+
+/* ---------- 8. Grade de videoaulas (cards estilo vitrine de curso) */
+#videoaulas .grid{ gap:22px; }
+#videoaulas .grid > div{
+  position:relative;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:16px;
+  transition:transform .45s var(--ease), box-shadow .45s var(--ease), border-color .3s ease;
+  will-change:transform;
+  transform-style:preserve-3d;
+}
+#videoaulas .grid > div:hover{
+  border-color:rgba(43,212,154,.45);
+  box-shadow:var(--glow);
+}
+/* luz que segue o mouse (posição vem do JS) */
+#videoaulas .grid > div::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%), rgba(43,212,154,.14), transparent 60%);
+  opacity:0; transition:opacity .3s ease;
+}
+#videoaulas .grid > div:hover::after{ opacity:1; }
+
+#videoaulas .grid > div .relative{ overflow:hidden; }
+#videoaulas .grid > div img{
+  height:170px;
+  transition:transform .8s var(--ease), filter .5s ease;
+  filter:saturate(.9) brightness(.92);
+}
+#videoaulas .grid > div:hover img{ transform:scale(1.08); filter:saturate(1.1) brightness(1); }
+
+/* degradê sobre a imagem + botão play */
+#videoaulas .grid > div .relative::before{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg, transparent 45%, rgba(22,36,31,.95) 100%);
+}
+#videoaulas .grid > div .absolute.inset-0{
+  z-index:2;
+  background:rgba(6,12,10,.35);
+  backdrop-filter:blur(1px);
+}
+#videoaulas .grid > div .absolute.inset-0 i{
+  font-size:0 !important;
+  width:58px; height:58px; border-radius:50%;
+  display:grid; place-items:center;
+  background:var(--grad-hot);
+  box-shadow:0 0 0 8px rgba(255,106,61,.2), 0 12px 28px -6px rgba(255,90,95,.8);
+  transform:scale(.6); transition:transform .45s var(--ease);
+}
+#videoaulas .grid > div .absolute.inset-0 i::before{ font-size:2rem; color:#fff; margin-left:2px; }
+#videoaulas .grid > div:hover .absolute.inset-0 i{ transform:scale(1); }
+
+#videoaulas .grid > div h4{ font-size:.95rem; line-height:1.35; color:#fff; }
+#videoaulas .grid > div .p-4{ padding:16px 18px 18px; }
+
+/* aula concluída: selo no canto */
+#videoaulas .grid > div.cl-done .relative::after{
+  content:"✓"; position:absolute; top:10px; right:10px; z-index:3;
+  width:28px; height:28px; border-radius:50%;
+  display:grid; place-items:center; font-weight:800; font-size:.85rem;
+  color:#06231A; background:var(--mint-deep);
+  box-shadow:0 6px 16px -4px rgba(43,212,154,.8);
+}
+/* imagem quebrada → capa em degradê (classe aplicada pelo JS) */
+#videoaulas .grid > div .cl-fallback{
+  height:170px; display:grid; place-items:center;
+  background:
+    radial-gradient(140px 90px at 80% 20%, rgba(255,106,61,.35), transparent 70%),
+    var(--grad);
+  color:#fff; font-family:'Fraunces',serif; font-size:2.6rem; font-weight:700;
+  text-shadow:0 4px 18px rgba(0,0,0,.35);
+}
+
+/* esconder/mostrar com filtro */
+#videoaulas .grid > div.cl-hide{ display:none; }
+
+/* ---------- 9. Selos de status */
+body .status-pill{ padding:4px 11px; font-size:.72rem; letter-spacing:.01em; border:1px solid transparent; }
+body .status-aprovado{ background:var(--mint); color:var(--mint-deep); border-color:rgba(43,212,154,.25); }
+body .status-cursando{ background:var(--amber-bg); color:var(--amber); border-color:rgba(255,181,71,.25); }
+body .status-reprovado{ background:var(--red-bg); color:var(--red); border-color:rgba(255,114,114,.25); }
+
+/* ---------- 10. Banner "Continue assistindo" + filtros (criados pelo JS) */
+.cl-hero{
+  position:relative; overflow:hidden;
+  border-radius:20px; margin-bottom:26px; min-height:220px;
+  display:flex; align-items:flex-end;
+  background:#0d1714 center/cover no-repeat;
+  border:1px solid var(--line);
+  isolation:isolate;
+}
+.cl-hero::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:
+    linear-gradient(90deg, rgba(8,15,13,.96) 0%, rgba(8,15,13,.75) 45%, rgba(8,15,13,.15) 100%),
+    linear-gradient(0deg, rgba(8,15,13,.9), transparent 60%);
+}
+.cl-hero__body{ padding:28px; max-width:520px; }
+.cl-hero__tag{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:#fff; background:var(--grad-hot); padding:5px 10px; border-radius:999px;
+}
+.cl-hero__title{
+  font-family:'Fraunces',serif; font-weight:700; color:#fff;
+  font-size:clamp(1.4rem, 2.6vw, 2rem); line-height:1.15; margin:12px 0 6px;
+}
+.cl-hero__meta{ color:#B9CEC6; font-size:.85rem; margin-bottom:18px; }
+.cl-hero__cta{
+  display:inline-flex; align-items:center; gap:8px;
+  background:#fff; color:#0A1311; font-weight:700; font-size:.9rem;
+  padding:11px 20px; border-radius:12px; border:0; cursor:pointer;
+  transition:transform .3s var(--ease), box-shadow .3s ease;
+}
+.cl-hero__cta:hover{ transform:translateY(-2px); box-shadow:0 14px 28px -10px rgba(255,255,255,.45); }
+.cl-hero__cta i{ font-size:1.2rem; }
+
+.cl-filters{ display:flex; gap:8px; flex-wrap:wrap; margin:-8px 0 22px; }
+.cl-chip{
+  font-size:.8rem; font-weight:600; color:var(--muted);
+  padding:7px 14px; border-radius:999px; cursor:pointer;
+  background:rgba(255,255,255,.04); border:1px solid var(--line);
+  transition:all .25s var(--ease);
+}
+.cl-chip:hover{ color:#fff; border-color:rgba(255,255,255,.2); }
+.cl-chip.is-on{ color:#06231A; background:var(--mint-deep); border-color:var(--mint-deep); }
+.cl-chip b{ margin-left:4px; opacity:.7; font-weight:700; }
+
+/* pulso para destacar a aula escolhida no banner */
+.cl-flash{ animation:clFlash 1.4s var(--ease) 2; }
+@keyframes clFlash{
+  0%,100%{ box-shadow:0 0 0 0 rgba(255,106,61,0); }
+  40%{ box-shadow:0 0 0 4px rgba(255,106,61,.9), 0 20px 40px -10px rgba(255,90,95,.7); }
+}
+
+/* ---------- 11. Entrada suave dos elementos */
+.cl-reveal{ opacity:0; transform:translateY(18px) scale(.98); }
+.cl-reveal.is-in{
+  opacity:1; transform:none;
+  transition:opacity .7s var(--ease), transform .7s var(--ease);
+  transition-delay:var(--d,0ms);
+}
+
+/* ---------- 12. Formulários (painel do professor / fórum) */
+body .input-field,
+body select.input-field,
+body textarea.input-field{
+  background:rgba(255,255,255,.04);
+  border-color:var(--line);
+  color:var(--ink);
+  border-radius:12px;
+  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+body .input-field::placeholder{ color:#61766E; }
+body .input-field:hover{ border-color:rgba(255,255,255,.18); }
+body .input-field:focus{
+  background:rgba(255,255,255,.06);
+  border-color:var(--mint-deep);
+  box-shadow:0 0 0 4px rgba(43,212,154,.15);
+}
+body select option{ background:#111C19; color:var(--ink); }
+body input, body textarea, body select{ color-scheme:dark; }
+
+/* Tabelas */
+body table thead th{
+  color:var(--muted); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+  background:rgba(255,255,255,.03);
+}
+body table tbody tr{ transition:background .2s ease; }
+body table tbody tr:hover{ background:rgba(43,212,154,.06); }
+body table td, body table th{ border-color:var(--line) !important; }
+
+/* Lista de vídeos publicados (painel) */
+#videos-list > *{
+  border-radius:14px; transition:transform .3s var(--ease), border-color .3s ease;
+}
+#videos-list > *:hover{ transform:translateY(-3px); border-color:rgba(43,212,154,.4); }
+
+/* Diploma liberado */
+#dp-unlocked{
+  background:
+    radial-gradient(300px 140px at 50% 0%, rgba(43,212,154,.25), transparent 70%),
+    var(--surface-2) !important;
+  border-color:rgba(43,212,154,.4) !important;
+}
+
+/* Fórum: bolhas de mensagem */
+#forum-messages > div{
+  background:var(--surface-2); border:1px solid var(--line);
+  border-radius:16px; padding:14px 16px;
+  animation:fadeIn .4s ease;
+}
+#forum-messages{ scrollbar-width:thin; }
+
+/* ---------- 13. Tela de login */
+#login-screen{
+  position:relative; overflow:hidden;
+  background:
+    radial-gradient(600px 400px at 15% 15%, rgba(31,191,138,.45), transparent 60%),
+    radial-gradient(500px 400px at 90% 85%, rgba(255,106,61,.25), transparent 60%),
+    radial-gradient(500px 500px at 70% 10%, rgba(14,124,134,.35), transparent 60%),
+    #071210;
+}
+#login-screen::before, #login-screen::after{
+  content:""; position:absolute; border-radius:50%; filter:blur(60px); opacity:.55;
+  animation:clFloat 14s ease-in-out infinite alternate;
+}
+#login-screen::before{ width:320px; height:320px; background:#1FBF8A; top:-80px; left:-60px; }
+#login-screen::after{ width:280px; height:280px; background:#FF6A3D; bottom:-90px; right:-40px; animation-delay:-6s; opacity:.35; }
+@keyframes clFloat{ to{ transform:translate(60px,40px) scale(1.15); } }
+
+#login-screen > .card{
+  position:relative; z-index:1;
+  background:rgba(17,28,25,.72);
+  backdrop-filter:blur(20px) saturate(150%);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;
+  padding:34px;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.8);
+  animation:clPop .8s var(--ease) both;
+}
+@keyframes clPop{ from{ opacity:0; transform:translateY(24px) scale(.96); } to{ opacity:1; transform:none; } }
+#login-screen .display{ color:#fff; }
+#login-screen .bg-\[var\(--paper\)\]{ background:rgba(0,0,0,.3); border:1px solid var(--line); }
+body .role-tab{ transition:all .3s var(--ease); }
+body .role-tab:hover{ color:#fff; }
+body .role-tab.active{ background:var(--grad); color:#fff; box-shadow:0 8px 20px -8px rgba(31,191,138,.8); }
+#login-hint{
+  background:rgba(255,255,255,.04) !important; border:1px dashed var(--line);
+  border-radius:12px; color:var(--muted);
+}
+
+/* ---------- 14. Rodapé */
+body footer{ border-color:var(--line); color:var(--muted); background:rgba(0,0,0,.15); }
+
+/* ---------- 15. Celular */
+@media (max-width:640px){
+  .cl-hero{ min-height:240px; }
+  .cl-hero__body{ padding:20px; }
+  body h3.display{ font-size:1.45rem; }
+  #videoaulas .grid > div img, #videoaulas .grid > div .cl-fallback{ height:190px; }
+}
+
+/* ---------- 16. Respeitar quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation:none !important; transition:none !important; }
+  .cl-reveal{ opacity:1; transform:none; }
+}
+
+/* ---------- 17. Impressão do certificado: tudo claro de novo */
+@media print{
+  body{ background:#fff !important; }
+}
