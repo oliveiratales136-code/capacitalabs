@@ -101,6 +101,7 @@
     .progress-fill{ transition:none; }
   }
 </style>
+<link rel="stylesheet" href="/capacitalab-tema.css?v=3">
 </head>
 <body>
 
@@ -441,18 +442,6 @@
               <input required id="sf-nome" class="input-field mt-1" placeholder="Ex: João Pedro Almeida">
             </div>
             <div>
-              <label class="text-xs font-medium text-[var(--muted)]">Matrícula</label>
-              <input required id="sf-matricula" class="input-field mt-1" placeholder="Ex: EF-24045">
-            </div>
-            <div>
-              <label class="text-xs font-medium text-[var(--muted)]">Curso</label>
-              <select id="sf-curso" class="input-field mt-1">
-                <option>Técnico em Enfermagem</option>
-                <option>Técnico em Radiologia</option>
-                <option>Técnico em Farmácia</option>
-              </select>
-            </div>
-            <div>
               <label class="text-xs font-medium text-[var(--muted)]">E-mail</label>
               <input required type="email" id="sf-email" class="input-field mt-1" placeholder="aluno@email.com">
             </div>
@@ -481,13 +470,11 @@
               <thead>
                 <tr class="text-left text-[var(--muted)] border-b border-[var(--line)]">
                   <th class="py-2 pr-4 font-medium">Nome</th>
-                  <th class="py-2 pr-4 font-medium">Matrícula</th>
-                  <th class="py-2 pr-4 font-medium">Curso</th>
                   <th class="py-2 font-medium">E-mail</th>
                 </tr>
               </thead>
               <tbody id="students-tbody">
-                <tr><td colspan="4" class="py-6 text-center text-[var(--muted)]">Nenhum aluno cadastrado ainda.</td></tr>
+                <tr><td colspan="2" class="py-6 text-center text-[var(--muted)]">Nenhum aluno cadastrado ainda.</td></tr>
               </tbody>
             </table>
           </div>
@@ -776,25 +763,23 @@
       populateStudentSelect();
 
       if(data.students.length === 0){
-        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-[var(--muted)]">Nenhum aluno cadastrado ainda.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="2" class="py-6 text-center text-[var(--muted)]">Nenhum aluno cadastrado ainda.</td></tr>`;
         return;
       }
       tbody.innerHTML = data.students.map(s=>`
         <tr class="border-b border-[var(--line)] last:border-0">
           <td class="py-3 pr-4">${s.nome}</td>
-          <td class="py-3 pr-4 mono">${s.matricula}</td>
-          <td class="py-3 pr-4">${s.curso}</td>
           <td class="py-3">${s.email}</td>
         </tr>
       `).join('');
     } catch {
-      tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-[var(--red)]">Não foi possível carregar os alunos.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="2" class="py-6 text-center text-[var(--red)]">Não foi possível carregar os alunos.</td></tr>`;
     }
   }
 
   function populateStudentSelect(){
     const options = '<option value="">Selecione um aluno cadastrado...</option>' +
-      cachedStudents.map(s => `<option value="${s.matricula}">${s.nome} — ${s.matricula}</option>`).join('');
+      cachedStudents.map(s => `<option value="${s.email}">${s.nome} — ${s.email}</option>`).join('');
     ['gf-aluno', 'dp-aluno'].forEach(id => {
       const select = document.getElementById(id);
       if(!select) return;
@@ -808,8 +793,6 @@
     e.preventDefault();
     const payload = {
       nome: document.getElementById('sf-nome').value.trim(),
-      matricula: document.getElementById('sf-matricula').value.trim(),
-      curso: document.getElementById('sf-curso').value,
       email: document.getElementById('sf-email').value.trim(),
       senha: document.getElementById('sf-senha').value,
     };
@@ -949,15 +932,15 @@
   }
 
   document.getElementById('dp-aluno').addEventListener('change', async (e)=>{
-    const matricula = e.target.value;
+    const email = e.target.value;
     const tbody = document.getElementById('dp-grades-tbody');
-    if(!matricula){
+    if(!email){
       showDiplomaState('empty');
       tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-[var(--muted)]">—</td></tr>`;
       return;
     }
     try{
-      const res = await fetch(`${API}/api/grades?matricula=${encodeURIComponent(matricula)}`, { headers: authHeaders() });
+      const res = await fetch(`${API}/api/grades?matricula=${encodeURIComponent(email)}`, { headers: authHeaders() });
       const data = await res.json();
       if(!res.ok) throw new Error(data.error);
 
@@ -980,7 +963,7 @@
       }).join('');
 
       const reprovado = data.grades.find(g => g.nota < 6);
-      const aluno = cachedStudents.find(s => s.matricula === matricula);
+      const aluno = cachedStudents.find(s => s.email === email);
       if(reprovado){
         document.getElementById('dp-locked-reason').textContent =
           `${aluno ? aluno.nome : 'Este aluno'} está reprovado(a) em "${reprovado.disciplina}". O diploma só pode ser emitido após a aprovação em todas as disciplinas.`;
@@ -996,7 +979,7 @@
 
   document.getElementById('dp-download-btn').addEventListener('click', ()=>{
     const select = document.getElementById('dp-aluno');
-    const aluno = cachedStudents.find(s => s.matricula === select.value);
+    const aluno = cachedStudents.find(s => s.email === select.value);
     document.getElementById('certificate-student-name').textContent = aluno ? aluno.nome : '';
     window.print();
   });
@@ -1111,5 +1094,6 @@
   });
 </script>
 
+<script src="/capacitalab-interativo.js?v=3"></script>
 </body>
 </html>
