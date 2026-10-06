@@ -1,7 +1,7 @@
 // db.js — armazenamento em arquivo JSON (sem compilação nativa, funciona em qualquer PC).
 const fs = require('fs');
 const path = require('path');
-const { hashPassword } = require('./auth');
+const { hashPassword, verifyPassword } = require('./auth');
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -43,29 +43,47 @@ state.nextGradeId = state.nextGradeId || 1;
 state.nextVideoId = state.nextVideoId || 1;
 state.nextForumId = state.nextForumId || 1;
 
-// ---- Seed dos usuários padrão (só roda se não houver nenhum usuário) ----
-if (!state.users || state.users.length === 0) {
-  state.users = state.users || [];
-  const seedUsers = [
-    { username: 'tacio.macedo',      password: 'Professor@123', role: 'professor', name: 'Tácio Macedo',      label: 'Professor responsável' },
-    { username: 'tales.oliveira',    password: 'Admin@123',     role: 'admin',     name: 'Tales Oliveira',    label: 'Administrador' },
-    { username: 'eduardo.rodrigues', password: 'Aluno@123',     role: 'aluno',     name: 'Eduardo Rodrigues', label: 'Técnico em Enfermagem' },
-  ];
-
-  for (const u of seedUsers) {
+// ---- Usuários padrão ----
+// As senhas NÃO ficam mais escritas no código. Elas vêm das variáveis de
+// ambiente configuradas no painel do Render (Environment):
+//   ADMIN_SENHA, PROFESSOR_SENHA e (opcional) ALUNO_SENHA
+// Se a variável existir, o usuário é criado ou tem a senha atualizada a cada
+// inicialização. Se não existir, o usuário não é criado.
+state.users = state.users || [];
+const seedUsers = [
+  { username: 'tacio.macedo',      env: 'PROFESSOR_SENHA', role: 'professor', name: 'Tácio Macedo',      label: 'Professor responsável' },
+  { username: 'tales.oliveira',    env: 'ADMIN_SENHA',     role: 'admin',     name: 'Tales Oliveira',    label: 'Administrador' },
+  { username: 'eduardo.rodrigues', env: 'ALUNO_SENHA',     role: 'aluno',     name: 'Eduardo Rodrigues', label: 'Técnico em Enfermagem' },
+];
+let seedChanged = false;
+for (const u of seedUsers) {
+  const senha = process.env[u.env];
+  const existing = state.users.find(x => x.username === u.username);
+  if (!senha) {
+    if (!existing) console.warn(`[db] ${u.env} não configurada: usuário ${u.username} não foi criado.`);
+    continue;
+  }
+  if (existing) {
+    if (!verifyPassword(senha, existing.password_hash)) {
+      existing.password_hash = hashPassword(senha);
+      seedChanged = true;
+      console.log(`[db] Senha de ${u.username} atualizada a partir de ${u.env}.`);
+    }
+  } else {
     state.users.push({
       id: state.nextUserId++,
       username: u.username,
-      password_hash: hashPassword(u.password),
+      password_hash: hashPassword(senha),
       role: u.role,
       name: u.name,
       label: u.label,
       created_at: new Date().toISOString(),
     });
+    seedChanged = true;
+    console.log(`[db] Usuário ${u.username} criado.`);
   }
-  save(state);
-  console.log('[db] Usuários padrão criados: tacio.macedo, tales.oliveira, eduardo.rodrigues');
 }
+if (seedChanged) save(state);
 
 // ---- API do "banco" ----
 module.exports = {
