@@ -242,11 +242,11 @@
       return n.nodeType !== 1 || n.classList.contains('cl-ripple') || n.classList.contains('cl-fallback') ||
         n.classList.contains('cl-hero') || n.classList.contains('cl-filters') ||
         n.classList.contains('cl-confetti') || n.classList.contains('cl-scrollbar') || n.classList.contains('cl-cursor-glow') ||
-        n.classList.contains('cl-faixa') || n.classList.contains('cl-ecg');
+        n.classList.contains('cl-faixa') || n.classList.contains('cl-ecg') || n.classList.contains('cl-staff-hero');
     };
     for (var i = 0; i < muts.length; i++) {
       var m = muts[i];
-      if (m.target.closest && m.target.closest('.cl-hero, .cl-filters')) continue;
+      if (m.target.closest && m.target.closest('.cl-hero, .cl-filters, .cl-staff-hero, .cl-faixa')) continue;
       var nodes = Array.prototype.slice.call(m.addedNodes).concat(Array.prototype.slice.call(m.removedNodes));
       if (nodes.length && !nodes.every(ours)) { refresh(); break; }
     }
@@ -311,22 +311,22 @@
     /* Porcentagem do progresso conta de 0 até o valor */
     var pct = document.getElementById('progress-pct');
     if (pct) {
-      var animating = false;
+      var written = '', run = 0;
       var countUp = function () {
-        var target = parseInt(pct.textContent, 10);
-        if (isNaN(target) || animating || pct.dataset.clShown === String(target)) return;
-        animating = true;
-        var t0 = performance.now(), dur = 1100;
-        (function step(now) {
-          var p = Math.min((now - t0) / dur, 1);
-          var eased = 1 - Math.pow(1 - p, 3);
-          pct.textContent = Math.round(target * eased) + '%';
-          if (p < 1) requestAnimationFrame(step);
-          else { pct.dataset.clShown = String(target); animating = false; }
-        })(t0);
+        var txt = pct.textContent;
+        if (txt === written) return;          // fui eu que escrevi: ignora
+        var target = parseInt(txt, 10);
+        if (isNaN(target) || target <= 0) return;
+        var my = ++run, t0 = performance.now(), dur = 1100;
+        (function step() {
+          if (my !== run) return;             // chegou um valor novo: para esta animação
+          var p = document.hidden ? 1 : Math.min((performance.now() - t0) / dur, 1);
+          written = Math.round(target * (1 - Math.pow(1 - p, 3))) + '%';
+          pct.textContent = written;
+          if (p < 1) setTimeout(step, 16);
+        })();
       };
-      new MutationObserver(function () { if (!animating) countUp(); })
-        .observe(pct, { childList: true, characterData: true, subtree: true });
+      new MutationObserver(countUp).observe(pct, { childList: true, characterData: true, subtree: true });
       countUp();
     }
   }
@@ -405,4 +405,122 @@
   else run();
   // as aulas podem carregar depois: tenta de novo algumas vezes
   var tries = 0, iv = setInterval(function () { run(); if (++tries > 10) clearInterval(iv); }, 800);
+})();
+
+
+/* =====================================================================
+   v4 · ÁREA DO PROFESSOR E DO ADMINISTRADOR
+   ===================================================================== */
+(function () {
+  'use strict';
+  var staff = document.getElementById('staff-app');
+  if (!staff) return;
+
+  function txt(id) { var el = document.getElementById(id); return el ? el.textContent.trim() : ''; }
+
+  /* Faixa passando abaixo do topo do painel */
+  function staffFaixa() {
+    var header = staff.querySelector(':scope > header');
+    if (!header) return;
+    var role = txt('staff-role-label');
+    var labels = Array.prototype.map.call(
+      staff.querySelectorAll('#staff-tabs .navtab span'),
+      function (s) { return s.textContent.trim(); }
+    ).filter(Boolean);
+    var items = ['Técnico em Enfermagem', role && role !== '—' ? 'Painel · ' + role : 'Painel administrativo'].concat(labels);
+    var key = items.join('|');
+    var faixa = staff.querySelector(':scope > .cl-faixa');
+    if (faixa && faixa.dataset.key === key) return;
+    if (!faixa) {
+      faixa = document.createElement('div');
+      faixa.className = 'cl-faixa';
+      faixa.setAttribute('aria-hidden', 'true');
+      header.insertAdjacentElement('afterend', faixa);
+    }
+    faixa.dataset.key = key;
+    var one = items.map(function () { return '<span></span>'; }).join('');
+    faixa.innerHTML = '<div class="cl-faixa__trilho">' + one + one + one + one + '</div>';
+    faixa.querySelectorAll('span').forEach(function (s, i) { s.textContent = items[i % items.length]; });
+  }
+
+  /* Contadores do banner */
+  function countStudents() {
+    var rows = document.querySelectorAll('#students-tbody tr');
+    var n = 0;
+    rows.forEach(function (r) { if (r.querySelectorAll('td').length > 1) n++; });
+    return n;
+  }
+  function countVideos() {
+    return document.querySelectorAll('#videos-list > div').length;
+  }
+  function goTab(name) {
+    var b = staff.querySelector('#staff-tabs [data-stab="' + name + '"]');
+    if (b) b.click();
+  }
+
+  /* Banner de boas-vindas */
+  function staffHero() {
+    var first = document.getElementById('cadastrar-aluno');
+    if (!first || !first.parentElement) return;
+    var col = first.parentElement;
+    var hero = col.querySelector(':scope > .cl-staff-hero');
+    var name = txt('staff-name');
+    var role = txt('staff-role-label');
+    var first_name = name && name !== '—' ? name.split(' ')[0] : '';
+    var h = new Date().getHours();
+    var saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+    var data = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    var nAl = countStudents(), nVi = countVideos();
+    var key = [first_name, role, nAl, nVi, saud].join('|');
+    if (hero && hero.dataset.key === key) return;
+
+    if (!hero) {
+      hero = document.createElement('div');
+      hero.className = 'cl-staff-hero';
+      col.prepend(hero);
+    }
+    hero.dataset.key = key;
+    hero.innerHTML =
+      (window.clEcgSvg ? window.clEcgSvg(8) : '') +
+      '<div class="cl-staff-hero__top">' +
+        '<div>' +
+          '<span class="cl-hero__eyebrow" style="margin-top:0"></span>' +
+          '<div class="cl-staff-hero__hello"></div>' +
+          '<div class="cl-staff-hero__date"></div>' +
+        '</div>' +
+        '<span class="cl-staff-hero__badge"><i class="ph-fill ph-heartbeat"></i><span class="cl-r"></span></span>' +
+      '</div>' +
+      '<div class="cl-stats">' +
+        '<div class="cl-stat" data-go="alunos-cadastrados"><i class="ph ph-users"></i><b>' + nAl + '</b><span>alunos cadastrados</span></div>' +
+        '<div class="cl-stat" data-go="staff-videos"><i class="ph ph-video-camera"></i><b>' + nVi + '</b><span>videoaulas publicadas</span></div>' +
+        '<div class="cl-stat" data-go="staff-diploma"><i class="ph ph-seal-check"></i><b>✚</b><span>emitir diplomas</span></div>' +
+      '</div>';
+    hero.querySelector('.cl-hero__eyebrow').textContent = 'Técnico em Enfermagem · Painel';
+    var hello = hero.querySelector('.cl-staff-hero__hello');
+    hello.textContent = saud + (first_name ? ', ' : '!');
+    if (first_name) {
+      var em = document.createElement('em');
+      em.textContent = first_name + '!';
+      hello.appendChild(em);
+    }
+    hero.querySelector('.cl-staff-hero__date').textContent = data.charAt(0).toUpperCase() + data.slice(1);
+    hero.querySelector('.cl-r').textContent = role && role !== '—' ? role : 'Equipe';
+    hero.querySelectorAll('[data-go]').forEach(function (s) {
+      s.onclick = function () { goTab(s.dataset.go); };
+    });
+  }
+
+  function run() { staffFaixa(); staffHero(); }
+  var t;
+  function later() { clearTimeout(t); t = setTimeout(run, 150); }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+
+  // atualiza quando o nome, a lista de alunos ou de vídeos mudar
+  ['staff-name', 'staff-role-label', 'students-tbody', 'videos-list'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) new MutationObserver(later).observe(el, { childList: true, characterData: true, subtree: true });
+  });
+  new MutationObserver(later).observe(staff, { attributes: true, attributeFilter: ['class'] });
 })();
