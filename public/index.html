@@ -101,7 +101,7 @@
     .progress-fill{ transition:none; }
   }
 </style>
-<link rel="stylesheet" href="/capacitalab-tema.css?v=3">
+<link rel="stylesheet" href="/capacitalab-tema.css?v=4">
 </head>
 <body>
 
@@ -138,10 +138,6 @@
       <button type="submit" class="btn btn-primary w-full font-semibold py-3 rounded-lg mt-2">Entrar</button>
     </form>
 
-    <div id="login-hint" class="mt-5 pt-4 border-t border-[var(--line)] text-xs text-[var(--muted)] leading-relaxed">
-      <span class="font-semibold text-[var(--ink)]">Acesso de demonstração — Aluno</span><br>
-      Usuário: <span class="mono">eduardo.rodrigues</span> · Senha: <span class="mono">Aluno@123</span>
-    </div>
   </div>
 </div>
 
@@ -679,20 +675,13 @@
     }
   })();
 
-  // ---- Tabs de perfil (apenas ajudam a mostrar a dica de login) ----
-  const roleHints = {
-    aluno:     'Use o usuário e senha do aluno cadastrado (ex.: <span class="mono">eduardo.rodrigues</span> / <span class="mono">Aluno@123</span>).',
-    professor: 'Usuário: <span class="mono">tacio.macedo</span> · Senha: <span class="mono">Professor@123</span>',
-    admin:     'Usuário: <span class="mono">tales.oliveira</span> · Senha: <span class="mono">Admin@123</span>',
-  };
+  // ---- Tabs de perfil ----
   const roleTitles = { aluno:'Aluno', professor:'Professor', admin:'Administrador' };
   document.querySelectorAll('.role-tab').forEach(tab=>{
     tab.addEventListener('click', ()=>{
       document.querySelectorAll('.role-tab').forEach(t=>t.classList.remove('active'));
       tab.classList.add('active');
       const role = tab.dataset.role;
-      document.getElementById('login-hint').innerHTML =
-        `<span class="font-semibold text-[var(--ink)]">Dica de acesso — ${roleTitles[role]}</span><br>${roleHints[role]}`;
       document.getElementById('login-error').classList.add('hidden');
     });
   });
@@ -1094,6 +1083,6 @@
   });
 </script>
 
-<script src="/capacitalab-interativo.js?v=3"></script>
+<script src="/capacitalab-interativo.js?v=4"></script>
 </body>
 </html>
