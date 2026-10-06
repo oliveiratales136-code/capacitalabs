@@ -424,3 +424,282 @@ body footer{ border-color:var(--line); color:var(--muted); background:rgba(0,0,0
 @media print{
   body{ background:#fff !important; }
 }
+
+
+/* =====================================================================
+   v2 · EFEITOS INTERATIVOS EXTRAS
+   ===================================================================== */
+
+/* ---------- 18. Barra de leitura no topo (o JS atualiza --scroll) */
+.cl-scrollbar{
+  position:fixed; top:0; left:0; z-index:60; height:3px; width:100%;
+  transform-origin:0 50%; transform:scaleX(var(--scroll,0));
+  background:linear-gradient(90deg,#2BD49A,#14A3A0,#FF6A3D);
+  box-shadow:0 0 12px rgba(43,212,154,.7);
+  pointer-events:none;
+}
+
+/* ---------- 19. Luz que acompanha o mouse pela página toda */
+.cl-cursor-glow{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(420px circle at var(--cx,50%) var(--cy,30%), rgba(43,212,154,.09), transparent 65%);
+  transition:opacity .4s ease;
+}
+#app > main, #staff-app > main, #app > header, #staff-app > header, #app > footer, #staff-app > footer{ position:relative; z-index:1; }
+body header.bg-white{ z-index:30; }
+
+/* ---------- 20. Logo com batimento cardíaco */
+body .bg-\[var\(--brand\)\].p-2.rounded-lg i,
+body .bg-\[var\(--brand\)\].p-2.rounded-lg svg{
+  display:inline-block;
+  animation:clHeartbeat 1.6s ease-in-out infinite;
+}
+@keyframes clHeartbeat{
+  0%,40%,100%{ transform:scale(1); }
+  10%{ transform:scale(1.22); }
+  20%{ transform:scale(1); }
+  30%{ transform:scale(1.15); }
+}
+body .bg-\[var\(--brand\)\].p-2.rounded-lg{ position:relative; }
+body .bg-\[var\(--brand\)\].p-2.rounded-lg::after{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  box-shadow:0 0 0 0 rgba(43,212,154,.6);
+  animation:clRing 1.6s ease-out infinite;
+}
+@keyframes clRing{ 0%{ box-shadow:0 0 0 0 rgba(43,212,154,.55); } 70%,100%{ box-shadow:0 0 0 12px rgba(43,212,154,0); } }
+
+/* ---------- 21. Borda em degradê girando (cards de aula e login) */
+@property --cl-angle{ syntax:"<angle>"; initial-value:0deg; inherits:false; }
+#videoaulas .grid > div,
+#login-screen > .card{
+  --cl-angle:0deg;
+}
+#videoaulas .grid > div::before{
+  content:""; position:absolute; inset:0; z-index:4; border-radius:inherit; padding:2px;
+  background:conic-gradient(from var(--cl-angle), #2BD49A, #14A3A0, #FF6A3D, #2BD49A);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  opacity:0; transition:opacity .35s ease;
+  animation:clSpin 3s linear infinite;
+  pointer-events:none;
+}
+#videoaulas .grid > div:hover::before{ opacity:1; }
+@keyframes clSpin{ to{ --cl-angle:360deg; } }
+
+#login-screen > .card::after{
+  content:""; position:absolute; inset:-1px; z-index:-1; border-radius:25px; padding:1px;
+  background:conic-gradient(from var(--cl-angle), transparent 0 60%, #2BD49A 75%, #FF6A3D 85%, transparent 95%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  animation:clSpin 4s linear infinite;
+  pointer-events:none;
+}
+#login-screen > .card{ transition:transform .2s ease-out; transform-style:preserve-3d; }
+
+/* ---------- 22. Brilho que passa pelos botões */
+body .btn-primary::after,
+.cl-hero__cta::after{
+  content:""; position:absolute; top:0; bottom:0; left:-60%; width:40%;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+  transform:skewX(-20deg);
+  transition:left .7s var(--ease);
+  pointer-events:none;
+}
+.cl-hero__cta{ position:relative; overflow:hidden; }
+body .btn-primary:hover::after,
+.cl-hero__cta:hover::after{ left:130%; }
+
+/* ---------- 23. Menu lateral: ícone balança e seta aparece */
+body .navtab:hover i{ animation:clWiggle .5s ease; }
+@keyframes clWiggle{
+  0%,100%{ transform:rotate(0) scale(1.15); }
+  25%{ transform:rotate(-12deg) scale(1.15); }
+  75%{ transform:rotate(12deg) scale(1.15); }
+}
+body .navtab::after{
+  content:"›"; margin-left:auto; font-size:1.3rem; line-height:1;
+  opacity:0; transform:translateX(-8px);
+  transition:opacity .25s ease, transform .3s var(--ease);
+}
+body .navtab:hover::after, body .navtab.active::after{ opacity:1; transform:none; }
+
+/* ---------- 24. Selos de status vivos */
+body .status-aprovado i, body .status-aprovado svg{ animation:clDot 2s ease-in-out infinite; }
+@keyframes clDot{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.3); filter:drop-shadow(0 0 4px #2BD49A); } }
+body .status-cursando i, body .status-cursando svg{ animation:clTurn 3s linear infinite; display:inline-block; }
+@keyframes clTurn{ to{ transform:rotate(360deg); } }
+
+/* ---------- 25. Card do aluno: avatar gira e o card brilha */
+body aside > .card:first-child{ transition:transform .4s var(--ease), box-shadow .4s ease, border-color .3s ease; }
+body aside > .card:first-child:hover{
+  transform:translateY(-4px);
+  border-color:rgba(43,212,154,.35);
+  box-shadow:0 24px 50px -24px rgba(31,191,138,.55);
+}
+body aside > .card:first-child img.rounded-xl{ transition:transform .7s var(--ease); }
+body aside > .card:first-child:hover img.rounded-xl{ transform:rotate(-6deg) scale(1.08); }
+body aside > .card:first-child .flex.justify-between{ border-radius:8px; transition:background .2s ease, padding .3s var(--ease); }
+body aside > .card:first-child .flex.justify-between:hover{ background:rgba(255,255,255,.04); padding:0 6px; }
+
+/* ---------- 26. Avatar do topo pula ao passar o mouse */
+body header img.rounded-full{ transition:transform .5s var(--ease); }
+body header img.rounded-full:hover{ transform:translateY(-3px) rotate(8deg) scale(1.08); }
+
+/* ---------- 27. Campos de formulário: rótulo acende ao digitar */
+body form div:focus-within > label{ color:var(--mint-deep); transition:color .2s ease; }
+body .input-field:focus{ transform:translateY(-1px); }
+body .input-field{ transition:border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .2s ease; }
+
+/* ---------- 28. Filtros: bolinha animada no ativo */
+.cl-chip{ position:relative; }
+.cl-chip:active{ transform:scale(.94); }
+.cl-chip.is-on::before{
+  content:""; display:inline-block; width:6px; height:6px; margin-right:6px; vertical-align:middle;
+  border-radius:50%; background:#06231A; animation:clDot 1.6s ease-in-out infinite;
+}
+
+/* ---------- 29. Confete ao clicar em "Ir para a aula" (peças criadas pelo JS) */
+.cl-confetti{
+  position:fixed; z-index:70; width:8px; height:12px; border-radius:2px; pointer-events:none;
+  animation:clFall 1.1s cubic-bezier(.2,.7,.4,1) forwards;
+}
+@keyframes clFall{
+  to{ transform:translate(var(--tx),var(--ty)) rotate(var(--rot)); opacity:0; }
+}
+
+/* ---------- 30. Linhas da tabela entram deslizando */
+body table tbody tr{ animation:clRow .5s var(--ease) both; }
+body table tbody tr:nth-child(2){ animation-delay:.05s; }
+body table tbody tr:nth-child(3){ animation-delay:.1s; }
+body table tbody tr:nth-child(4){ animation-delay:.15s; }
+body table tbody tr:nth-child(n+5){ animation-delay:.2s; }
+@keyframes clRow{ from{ opacity:0; transform:translateX(-12px); } to{ opacity:1; transform:none; } }
+
+/* ---------- 31. Celular e toque: sem efeitos de mouse */
+@media (hover:none){
+  .cl-cursor-glow{ display:none; }
+  #videoaulas .grid > div::before{ display:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  .cl-cursor-glow, .cl-confetti{ display:none; }
+}
+
+
+/* =====================================================================
+   v3 · DETALHES "MONITOR CARDÍACO" (inspirados na Auto Elétrica Titi)
+   ===================================================================== */
+
+/* ---------- 32. Coração da logo batendo forte (topo e login) */
+body .bg-\[var\(--brand\)\].p-2.rounded-lg i,
+body .bg-\[var\(--brand\)\].p-2.rounded-lg svg{
+  display:inline-block;
+  transform-origin:50% 55%;
+  animation:clHeartbeat2 1.2s cubic-bezier(.3,0,.3,1) infinite;
+  filter:drop-shadow(0 0 0 rgba(255,255,255,0));
+}
+@keyframes clHeartbeat2{
+  0%  { transform:scale(1);    filter:drop-shadow(0 0 0 rgba(255,255,255,0)); }
+  12% { transform:scale(1.32); filter:drop-shadow(0 0 6px rgba(255,255,255,.9)); }
+  24% { transform:scale(.96); }
+  36% { transform:scale(1.2);  filter:drop-shadow(0 0 4px rgba(255,255,255,.7)); }
+  55% { transform:scale(1);    filter:drop-shadow(0 0 0 rgba(255,255,255,0)); }
+  100%{ transform:scale(1); }
+}
+body .bg-\[var\(--brand\)\].p-2.rounded-lg::after{ animation:clRing 1.2s ease-out infinite; }
+body .bg-\[var\(--brand\)\].p-2.rounded-lg::before{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  animation:clRing 1.2s ease-out .36s infinite;
+  pointer-events:none;
+}
+
+/* ---------- 33. Fundo com linhas finas (grade de monitor) */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size:48px 48px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 20%, #000 30%, transparent 85%);
+          mask-image:radial-gradient(ellipse 80% 60% at 50% 20%, #000 30%, transparent 85%);
+}
+
+/* ---------- 34. Eletrocardiograma com o pulso correndo (criado pelo JS) */
+.cl-ecg{ display:block; width:100%; height:56px; overflow:visible; }
+.cl-ecg .base{
+  fill:none; stroke:rgba(255,255,255,.22); stroke-width:1.5;
+  stroke-linejoin:round; stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
+.cl-ecg .pulso, .cl-ecg .halo{
+  fill:none; stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:90 910; stroke-dashoffset:1000;
+  vector-effect:non-scaling-stroke;
+  animation:clEcg 2.6s linear infinite;
+}
+.cl-ecg .pulso{ stroke:#7DFFD0; stroke-width:2.5; }
+.cl-ecg .halo { stroke:#2BD49A; stroke-width:10; opacity:.35; filter:blur(3px); }
+@keyframes clEcg{ to{ stroke-dashoffset:0; } }
+
+/* ECG dentro do banner "Continue de onde parou" */
+.cl-hero .cl-ecg{
+  position:absolute; left:0; right:0; bottom:18px; height:60px; z-index:0;
+  opacity:.9; pointer-events:none;
+}
+.cl-hero__body{ position:relative; z-index:1; }
+
+/* ECG na tela de login, logo abaixo do nome */
+#login-screen .cl-ecg{ height:40px; margin:-4px 0 14px; }
+
+/* ---------- 35. Etiqueta pequena estilo "rótulo" no banner */
+.cl-hero__eyebrow{
+  display:block; margin-top:14px;
+  font-size:.68rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--mint-deep);
+}
+.cl-hero__eyebrow + .cl-hero__title{ margin-top:4px; }
+
+/* ---------- 36. Números grandes no banner (aulas e horas) */
+.cl-stats{ display:flex; gap:28px; margin:2px 0 18px; }
+.cl-stat{ display:flex; align-items:center; gap:10px; }
+.cl-stat b{
+  font-family:'Fraunces',serif; font-size:2.1rem; font-weight:700; line-height:1; color:#fff;
+}
+.cl-stat span{
+  font-size:.62rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  color:#9DB3AA; line-height:1.3; max-width:90px;
+}
+
+/* ---------- 37. Faixa com as aulas passando (logo abaixo do topo) */
+.cl-faixa{
+  position:relative; z-index:2; overflow:hidden;
+  background:var(--grad);
+  box-shadow:0 10px 30px -14px rgba(31,191,138,.8);
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.cl-faixa__trilho{
+  display:flex; width:max-content; gap:34px; padding:11px 0;
+  white-space:nowrap; will-change:transform;
+  animation:clPassa 32s linear infinite;
+}
+.cl-faixa:hover .cl-faixa__trilho{ animation-play-state:paused; }
+.cl-faixa__trilho span{
+  display:inline-flex; align-items:center; gap:34px;
+  font-size:.78rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase;
+  color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.15);
+}
+.cl-faixa__trilho span::after{
+  content:"✚"; font-size:.85rem; color:#FFD9C9;
+  text-shadow:0 0 10px rgba(255,106,61,.9);
+}
+@keyframes clPassa{ to{ transform:translateX(-50%); } }
+
+/* ---------- 38. Celular */
+@media (max-width:640px){
+  .cl-stats{ gap:18px; }
+  .cl-stat b{ font-size:1.7rem; }
+  .cl-hero .cl-ecg{ bottom:auto; top:14px; opacity:.5; }
+}
+@media (prefers-reduced-motion: reduce){
+  .cl-faixa__trilho{ animation:none; }
+}

@@ -7,6 +7,31 @@
   'use strict';
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* Desenho de eletrocardiograma (usado no banner e no login) */
+  function clEcgSvg(beats) {
+    var d = 'M0 30', step = 1000 / beats;
+    for (var i = 0; i < beats; i++) {
+      var x = i * step;
+      d += ' L' + (x + step * .35) + ' 30' +
+           ' L' + (x + step * .42) + ' 24' +
+           ' L' + (x + step * .48) + ' 30' +
+           ' L' + (x + step * .55) + ' 30' +
+           ' L' + (x + step * .60) + ' 38' +
+           ' L' + (x + step * .66) + ' 2' +
+           ' L' + (x + step * .72) + ' 56' +
+           ' L' + (x + step * .77) + ' 30' +
+           ' L' + (x + step * .86) + ' 30' +
+           ' L' + (x + step * .92) + ' 22' +
+           ' L' + (x + step * .98) + ' 30';
+    }
+    d += ' L1000 30';
+    return '<svg class="cl-ecg" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path class="base" d="' + d + '"/>' +
+      '<path class="halo" pathLength="1000" d="' + d + '"/>' +
+      '<path class="pulso" pathLength="1000" d="' + d + '"/></svg>';
+  }
+  window.clEcgSvg = clEcgSvg;
+
   /* ---------- 1. Cabeçalho ganha sombra ao rolar */
   function onScroll() {
     document.querySelectorAll('header.bg-white').forEach(function (h) {
@@ -115,14 +140,37 @@
     var nProf = (next.querySelector('p') || {}).textContent || '';
     var nTime = ((next.querySelector('.mt-3 span') || {}).textContent || '').trim();
     hero.style.backgroundImage = nImg && nImg.src ? 'url("' + nImg.src + '")' : 'var(--grad)';
+    // soma a duração de todas as aulas (formato mm:ss ou hh:mm:ss)
+    var totalMin = 0;
+    cards.forEach(function (c) {
+      var tx = ((c.querySelector('.mt-3 span') || {}).textContent || '').trim();
+      var p = tx.split(':').map(Number);
+      if (p.length === 2 && !p.some(isNaN)) totalMin += p[0] + p[1] / 60;
+      if (p.length === 3 && !p.some(isNaN)) totalMin += p[0] * 60 + p[1] + p[2] / 60;
+    });
+    var h = Math.floor(totalMin / 60), m = Math.round(totalMin % 60);
+    var horas = h ? h + 'h' + (m < 10 ? '0' : '') + m : m + 'min';
+    var curso = '';
+    document.querySelectorAll('aside .flex.justify-between').forEach(function (row) {
+      var s = row.querySelectorAll('span');
+      if (s.length > 1 && /curso/i.test(s[0].textContent) && !/progresso/i.test(s[0].textContent)) curso = s[1].textContent.trim();
+    });
+
     hero.innerHTML =
+      clEcgSvg(9) +
       '<div class="cl-hero__body">' +
         '<span class="cl-hero__tag"><i class="ph-fill ph-lightning"></i>' +
           (pend.length ? 'Continue de onde parou' : 'Curso concluído') + '</span>' +
+        '<span class="cl-hero__eyebrow"></span>' +
         '<div class="cl-hero__title"></div>' +
         '<div class="cl-hero__meta"></div>' +
+        '<div class="cl-stats">' +
+          '<div class="cl-stat"><b>' + cards.length + '</b><span>aulas no curso</span></div>' +
+          (totalMin ? '<div class="cl-stat"><b>' + horas + '</b><span>de conteúdo</span></div>' : '') +
+        '</div>' +
         '<button type="button" class="cl-hero__cta"><i class="ph-fill ph-play-circle"></i>Ir para a aula</button>' +
       '</div>';
+    hero.querySelector('.cl-hero__eyebrow').textContent = curso;
     hero.querySelector('.cl-hero__title').textContent = nTitle;
     hero.querySelector('.cl-hero__meta').textContent =
       [nProf, nTime, done.length + ' de ' + cards.length + ' aulas concluídas'].filter(Boolean).join(' · ');
@@ -192,7 +240,9 @@
   var mo = new MutationObserver(function (muts) {
     var ours = function (n) {
       return n.nodeType !== 1 || n.classList.contains('cl-ripple') || n.classList.contains('cl-fallback') ||
-        n.classList.contains('cl-hero') || n.classList.contains('cl-filters');
+        n.classList.contains('cl-hero') || n.classList.contains('cl-filters') ||
+        n.classList.contains('cl-confetti') || n.classList.contains('cl-scrollbar') || n.classList.contains('cl-cursor-glow') ||
+        n.classList.contains('cl-faixa') || n.classList.contains('cl-ecg');
     };
     for (var i = 0; i < muts.length; i++) {
       var m = muts[i];
@@ -202,4 +252,157 @@
     }
   });
   mo.observe(document.body, { childList: true, subtree: true });
+})();
+
+
+/* =====================================================================
+   v2 · EFEITOS INTERATIVOS EXTRAS
+   ===================================================================== */
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var touch = window.matchMedia('(hover: none)').matches;
+
+  function start() {
+    /* Barra de leitura no topo */
+    var bar = document.createElement('div');
+    bar.className = 'cl-scrollbar';
+    document.body.appendChild(bar);
+    function updateBar() {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.setProperty('--scroll', max > 0 ? Math.min(window.scrollY / max, 1) : 0);
+    }
+    window.addEventListener('scroll', updateBar, { passive: true });
+    window.addEventListener('resize', updateBar);
+    updateBar();
+
+    if (reduce) return;
+
+    /* Luz que segue o mouse */
+    if (!touch) {
+      var glow = document.createElement('div');
+      glow.className = 'cl-cursor-glow';
+      document.body.prepend(glow);
+      var raf = 0, cx = 0, cy = 0;
+      window.addEventListener('pointermove', function (e) {
+        cx = e.clientX; cy = e.clientY;
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          glow.style.setProperty('--cx', cx + 'px');
+          glow.style.setProperty('--cy', cy + 'px');
+          raf = 0;
+        });
+      }, { passive: true });
+    }
+
+    /* Cartão de login inclina com o mouse */
+    var login = document.getElementById('login-screen');
+    var lcard = login && login.querySelector('.card');
+    if (lcard && !touch) {
+      login.addEventListener('pointermove', function (e) {
+        var r = lcard.getBoundingClientRect();
+        var x = (e.clientX - (r.left + r.width / 2)) / window.innerWidth;
+        var y = (e.clientY - (r.top + r.height / 2)) / window.innerHeight;
+        lcard.style.transform = 'perspective(1000px) rotateY(' + (x * 10) + 'deg) rotateX(' + (-y * 10) + 'deg)';
+      });
+      login.addEventListener('pointerleave', function () { lcard.style.transform = ''; });
+    }
+
+    /* Porcentagem do progresso conta de 0 até o valor */
+    var pct = document.getElementById('progress-pct');
+    if (pct) {
+      var animating = false;
+      var countUp = function () {
+        var target = parseInt(pct.textContent, 10);
+        if (isNaN(target) || animating || pct.dataset.clShown === String(target)) return;
+        animating = true;
+        var t0 = performance.now(), dur = 1100;
+        (function step(now) {
+          var p = Math.min((now - t0) / dur, 1);
+          var eased = 1 - Math.pow(1 - p, 3);
+          pct.textContent = Math.round(target * eased) + '%';
+          if (p < 1) requestAnimationFrame(step);
+          else { pct.dataset.clShown = String(target); animating = false; }
+        })(t0);
+      };
+      new MutationObserver(function () { if (!animating) countUp(); })
+        .observe(pct, { childList: true, characterData: true, subtree: true });
+      countUp();
+    }
+  }
+
+  /* Confete ao clicar em "Ir para a aula" */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.cl-hero__cta');
+    if (!btn || reduce) return;
+    var r = btn.getBoundingClientRect();
+    var colors = ['#2BD49A', '#14A3A0', '#FF6A3D', '#FFB547', '#ffffff'];
+    for (var i = 0; i < 26; i++) {
+      var c = document.createElement('span');
+      c.className = 'cl-confetti';
+      c.style.left = (r.left + r.width / 2) + 'px';
+      c.style.top = (r.top + r.height / 2) + 'px';
+      c.style.background = colors[i % colors.length];
+      var ang = Math.random() * Math.PI * 2, dist = 60 + Math.random() * 110;
+      c.style.setProperty('--tx', Math.cos(ang) * dist + 'px');
+      c.style.setProperty('--ty', (Math.sin(ang) * dist + 80) + 'px');
+      c.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      document.body.appendChild(c);
+      setTimeout(function (el) { el.remove(); }.bind(null, c), 1200);
+    }
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+
+
+/* =====================================================================
+   v3 · FAIXA DAS AULAS PASSANDO + ECG NO LOGIN
+   ===================================================================== */
+(function () {
+  'use strict';
+
+  function addLoginEcg() {
+    var card = document.querySelector('#login-screen > .card');
+    if (!card || card.querySelector('.cl-ecg') || !window.clEcgSvg) return;
+    var sub = card.querySelector('p');
+    if (!sub) return;
+    sub.insertAdjacentHTML('afterend', window.clEcgSvg(4));
+  }
+
+  function addFaixa() {
+    var app = document.getElementById('app');
+    var header = app && app.querySelector(':scope > header');
+    if (!header) return;
+    var titles = Array.prototype.map.call(
+      document.querySelectorAll('#videoaulas .grid > div h4'),
+      function (h) { return h.textContent.trim(); }
+    ).filter(Boolean);
+    if (!titles.length) return;
+
+    var faixa = app.querySelector(':scope > .cl-faixa');
+    var key = titles.join('|');
+    if (faixa && faixa.dataset.key === key) return;
+    if (!faixa) {
+      faixa = document.createElement('div');
+      faixa.className = 'cl-faixa';
+      faixa.setAttribute('aria-hidden', 'true');
+      header.insertAdjacentElement('afterend', faixa);
+    }
+    faixa.dataset.key = key;
+
+    var items = ['Técnico em Enfermagem'].concat(titles);
+    // repete a lista para preencher a tela e emendar sem pulo
+    var one = items.map(function (t) { return '<span></span>'; }).join('');
+    faixa.innerHTML = '<div class="cl-faixa__trilho">' + one + one + one + one + '</div>';
+    var spans = faixa.querySelectorAll('span');
+    spans.forEach(function (s, i) { s.textContent = items[i % items.length]; });
+  }
+
+  function run() { addLoginEcg(); addFaixa(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+  // as aulas podem carregar depois: tenta de novo algumas vezes
+  var tries = 0, iv = setInterval(function () { run(); if (++tries > 10) clearInterval(iv); }, 800);
 })();
