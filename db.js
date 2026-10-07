@@ -53,7 +53,7 @@ state.users = state.users || [];
 const seedUsers = [
   { username: 'tacio.macedo',      env: 'PROFESSOR_SENHA', role: 'professor', name: 'Tácio Macedo',      label: 'Professor responsável' },
   { username: 'tales.oliveira',    env: 'ADMIN_SENHA',     role: 'admin',     name: 'Tales Oliveira',    label: 'Administrador' },
-  { username: 'eduardo.rodrigues', env: 'ALUNO_SENHA',     role: 'aluno',     name: 'Eduardo Rodrigues', label: 'Técnico em Enfermagem' },
+  { username: 'eduardo.rodrigues', env: 'ALUNO_SENHA',     role: 'aluno',     name: 'Eduardo Rodrigues', label: 'Curso de Enfermagem' },
 ];
 let seedChanged = false;
 for (const u of seedUsers) {
@@ -64,6 +64,7 @@ for (const u of seedUsers) {
     continue;
   }
   if (existing) {
+    if (existing.label !== u.label) { existing.label = u.label; seedChanged = true; }
     if (!verifyPassword(senha, existing.password_hash)) {
       existing.password_hash = hashPassword(senha);
       seedChanged = true;
