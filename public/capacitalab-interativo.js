@@ -170,7 +170,7 @@
         '</div>' +
         '<button type="button" class="cl-hero__cta"><i class="ph-fill ph-play-circle"></i>Ir para a aula</button>' +
       '</div>';
-    hero.querySelector('.cl-hero__eyebrow').textContent = curso;
+    hero.querySelector('.cl-hero__eyebrow').textContent = curso ? (/^curso/i.test(curso) ? curso : 'Curso de ' + curso) : 'Curso de Enfermagem';
     hero.querySelector('.cl-hero__title').textContent = nTitle;
     hero.querySelector('.cl-hero__meta').textContent =
       [nProf, nTime, done.length + ' de ' + cards.length + ' aulas concluídas'].filter(Boolean).join(' · ');
@@ -392,7 +392,7 @@
     }
     faixa.dataset.key = key;
 
-    var items = ['Técnico em Enfermagem'].concat(titles);
+    var items = ['Curso de Enfermagem'].concat(titles);
     // repete a lista para preencher a tela e emendar sem pulo
     var one = items.map(function (t) { return '<span></span>'; }).join('');
     faixa.innerHTML = '<div class="cl-faixa__trilho">' + one + one + one + one + '</div>';
@@ -418,6 +418,14 @@
 
   function txt(id) { var el = document.getElementById(id); return el ? el.textContent.trim() : ''; }
 
+  /* Título da equipe: o professor é Enfermeiro (não técnico) */
+  function staffTitle() {
+    var r = txt('staff-role-label').toLowerCase();
+    if (r.indexOf('admin') !== -1) return 'Administração';
+    if (r.indexOf('prof') !== -1) return 'Enfermeiro';
+    return 'Equipe CapacitaLab';
+  }
+
   /* Faixa passando abaixo do topo do painel */
   function staffFaixa() {
     var header = staff.querySelector(':scope > header');
@@ -427,7 +435,7 @@
       staff.querySelectorAll('#staff-tabs .navtab span'),
       function (s) { return s.textContent.trim(); }
     ).filter(Boolean);
-    var items = ['Técnico em Enfermagem', role && role !== '—' ? 'Painel · ' + role : 'Painel administrativo'].concat(labels);
+    var items = [staffTitle(), role && role !== '—' ? 'Painel · ' + role : 'Painel administrativo'].concat(labels);
     var key = items.join('|');
     var faixa = staff.querySelector(':scope > .cl-faixa');
     if (faixa && faixa.dataset.key === key) return;
@@ -495,7 +503,7 @@
         '<div class="cl-stat" data-go="staff-videos"><i class="ph ph-video-camera"></i><b>' + nVi + '</b><span>videoaulas publicadas</span></div>' +
         '<div class="cl-stat" data-go="staff-diploma"><i class="ph ph-seal-check"></i><b>✚</b><span>emitir diplomas</span></div>' +
       '</div>';
-    hero.querySelector('.cl-hero__eyebrow').textContent = 'Técnico em Enfermagem · Painel';
+    hero.querySelector('.cl-hero__eyebrow').textContent = staffTitle() + ' · Painel';
     var hello = hero.querySelector('.cl-staff-hero__hello');
     hello.textContent = saud + (first_name ? ', ' : '!');
     if (first_name) {
